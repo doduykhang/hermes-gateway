@@ -3,11 +3,12 @@ package route
 import (
 	"doduykhang/hermes-gateway/pkg/controller"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/go-chi/chi/v5"
 )
 
-func AuthRoute(r fiber.Router, authController *controller.Auth) {
-	user := r.Group("/auth")
-	user.Post("/register", authController.Register)
-	user.Post("/login", authController.Login)
+func AuthRoute(r chi.Router, authController *controller.Auth) {
+	r.Route("/auth", func (r chi.Router) {
+		r.Post("/register", authController.Register)
+		r.Post("/login", authController.Login)
+	})
 }

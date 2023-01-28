@@ -1,11 +1,19 @@
 package config
 
-import "github.com/redis/go-redis/v9"
+import (
+	"fmt"
 
-func NewRedis() *redis.Client {
+	"github.com/redis/go-redis/v9"
+)
+
+func getRedisConn(redis Redis) string {
+	return fmt.Sprintf("%s:%s", redis.Host, redis.Port)
+}
+
+func NewRedis(config *Config) *redis.Client {
 	rdb := redis.NewClient(&redis.Options{
-        	Addr:     "localhost:6379",
-        	Password: "", // no password set
+        	Addr:     getRedisConn(config.Redis),
+        	Password: config.Redis.Password, // no password set
         	DB:       0,  // use default DB
     	})
 	return rdb

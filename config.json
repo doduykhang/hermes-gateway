@@ -1,0 +1,21 @@
+{
+	"PROXY": {
+		"CHAT": "http://localhost:8082",
+		"CONVERSATION": "http://localhost:8083"
+	},
+	"GRPC": {
+		"ACCOUNT": "localhost:8081"
+	},
+	"DB": {
+		"HOST": "localhost",
+		"PORT": "3306",
+		"USER": "sammy",
+		"PASSWORD": "password",
+		"NAME": "hermes_account"
+	},
+	"REDIS": {
+		"HOST": "localhost",
+		"PORT": "6379",
+		"PASSWORD": ""
+	}
+}

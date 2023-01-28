@@ -7,20 +7,26 @@ import (
 	"doduykhang/hermes-gateway/pkg/middleware"
 	"doduykhang/hermes-gateway/pkg/route"
 	"doduykhang/hermes-gateway/pkg/service"
+	"fmt"
 	"log"
+	"net/http"
 
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/go-chi/chi/v5"
+	chiMid "github.com/go-chi/chi/v5/middleware"
 )
 
-func NewRestApi() {
-	app := fiber.New()
+var port = "8080"
 
- 	api := app.Group("/api", logger.New()) // /api
+func NewRestApi() {
+	r := chi.NewRouter()
+	r.Use(chiMid.Logger)
 	
 	//config
-	grpcConn := config.NewGrpcConnection()
-	redisClient := config.NewRedis()
+	conf := config.LoadConfig()
+	grpcConn := config.NewGrpcConnection(conf.GRPC.Account)
+	redisClient := config.NewRedis(conf)
+	chatProxy := config.NewProxy(conf.Proxy.Chat)
+	conversationProxy := config.NewProxy(conf.Proxy.Conversation)
 	
 	//service 
 	authService := proto.NewAccountServiceClient(grpcConn)
@@ -32,10 +38,17 @@ func NewRestApi() {
 
 	//controller 
 	authController := controller.NewAuth(authService, tokenService)
+	chatController := controller.NewChat(chatProxy)
+	conversationController := controller.NewConversation(conversationProxy)
 
 	//route
-	route.AuthRoute(api, authController)
-	route.TAuth(api, authController, authMiddleware)
+	r.Route("/api", func (r chi.Router) {
+		route.AuthRoute(r, authController)
+		route.TAuth(r, authController, authMiddleware)
+		route.ChatRoute(r, chatController, authMiddleware)
+		route.ConversationRoute(r, conversationController, authMiddleware)
+	})
 
-	log.Fatal(app.Listen(":8082"))
+	log.Printf("Gateway starting at port %s", port)	
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), r))
 }

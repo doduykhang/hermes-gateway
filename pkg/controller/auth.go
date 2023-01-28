@@ -4,9 +4,9 @@ import (
 	"context"
 	"doduykhang/hermes-gateway/internal/proto"
 	"doduykhang/hermes-gateway/pkg/service"
+	"encoding/json"
 	"log"
-
-	"github.com/gofiber/fiber/v2"
+	"net/http"
 )
 
 type Auth struct {
@@ -21,73 +21,72 @@ func NewAuth(service proto.AccountServiceClient, tokenService service.Token) *Au
 	}
 }
 
-func (c *Auth) Register(ctx *fiber.Ctx) error {
+func (c *Auth) Register(w http.ResponseWriter, r *http.Request) {
 	var req proto.RegisterRequest
-	if err := ctx.BodyParser(&req); err != nil {
-		return err
+
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)	
+		w.Write([]byte(err.Error()))
+		return
 	}
 
-	con := context.TODO()
-	con = context.WithValue(con, "test-key", "test-value")
-
-	log.Println("context before",con)
-
-	res, err := c.service.Register(con, &req)
+	res, err := c.service.Register(context.Background(), &req)
 	if err != nil {
-		return err
+		w.WriteHeader(http.StatusInternalServerError)	
+		w.Write([]byte(err.Error()))
+		return
 	}
 
 	token, err := c.tokenService.CreateToken(res.UserID)
 	if err != nil {
-		return err
+		w.WriteHeader(http.StatusInternalServerError)	
+		w.Write([]byte(err.Error()))
+		return
 	}
-
-	var response struct {
-		Token string `json:"token"`		
-	}
-
-	ctx.Cookie(&fiber.Cookie{
+		
+	http.SetCookie(w, &http.Cookie{
 		Name: "session-id",
 		Value: token,
 		Path: "/api",
 		Domain: "localhost",
 		Secure: true,
-		HTTPOnly: true,
+		HttpOnly: true,
 	})
 
-	response.Token = token
-	return ctx.JSON(response)
+	w.Write([]byte("Ok"))
 }
 
-func (c *Auth) Login(ctx *fiber.Ctx) error {
+func (c *Auth) Login(w http.ResponseWriter, r *http.Request) {
 	var req proto.LoginRequest
-	if err := ctx.BodyParser(&req); err != nil {
-		return err
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)	
+		w.Write([]byte(err.Error()))
+		return
 	}
 
 	res, err := c.service.Login(context.Background(), &req)
 	if err != nil {
-		return err
+		w.WriteHeader(http.StatusInternalServerError)	
+		w.Write([]byte(err.Error()))
+		return 
 	}
 
 	token, err := c.tokenService.CreateToken(res.UserID)
 	if err != nil {
-		return err
+		w.WriteHeader(http.StatusInternalServerError)	
+		w.Write([]byte(err.Error()))
+		return
 	}
 
-	var response struct {
-		Token string `json:"token"`		
-	}
-
-	ctx.Cookie(&fiber.Cookie{
+	http.SetCookie(w, &http.Cookie{
 		Name: "session-id",
 		Value: token,
 		Path: "/api",
 		Domain: "localhost",
-		Secure: true,
-		HTTPOnly: true,
+		HttpOnly: true,
 	})
-	
-	response.Token = token
-	return ctx.JSON(response)
+
+	w.Write([]byte("Ok"))
 }

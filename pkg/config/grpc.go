@@ -5,9 +5,9 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-func NewGrpcConnection () *grpc.ClientConn {
+func NewGrpcConnection (addr string) *grpc.ClientConn {
 	conn, err := grpc.Dial(
-		"localhost:8081", 
+		addr, 
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithBlock(),
 	)
