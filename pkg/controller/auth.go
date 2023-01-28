@@ -4,6 +4,7 @@ import (
 	"context"
 	"doduykhang/hermes-gateway/internal/proto"
 	"doduykhang/hermes-gateway/pkg/service"
+	"log"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -26,7 +27,12 @@ func (c *Auth) Register(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	res, err := c.service.Register(context.Background(), &req)
+	con := context.TODO()
+	con = context.WithValue(con, "test-key", "test-value")
+
+	log.Println("context before",con)
+
+	res, err := c.service.Register(con, &req)
 	if err != nil {
 		return err
 	}

@@ -37,5 +37,5 @@ func NewRestApi() {
 	route.AuthRoute(api, authController)
 	route.TAuth(api, authController, authMiddleware)
 
-	log.Fatal(app.Listen(":8080"))
+	log.Fatal(app.Listen(":8082"))
 }

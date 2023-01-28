@@ -10,6 +10,6 @@ import (
 func TAuth(r fiber.Router, authController *controller.Auth, authMidddleware *middleware.Authenticate) {
 	user := r.Group("/t")
 	user.Get("/", authMidddleware.Authenticate, func (c *fiber.Ctx) error {
-		return c.Send([]byte("You are in"))	
+		return c.Send([]byte("You are in" + c.Locals("userID").(string)))	
 	})
 }
