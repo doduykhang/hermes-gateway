@@ -15,7 +15,6 @@ import (
 	chiMid "github.com/go-chi/chi/v5/middleware"
 )
 
-var port = "8080"
 
 func NewRestApi() {
 	r := chi.NewRouter()
@@ -49,6 +48,6 @@ func NewRestApi() {
 		route.ConversationRoute(r, conversationController, authMiddleware)
 	})
 
-	log.Printf("Gateway starting at port %s", port)	
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), r))
+	log.Printf("Gateway starting at port %s", conf.Server.Port)	
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", conf.Server.Port), r))
 }

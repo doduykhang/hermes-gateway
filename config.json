@@ -1,4 +1,8 @@
 {
+	"SERVER": {
+		"PORT": "8080",
+		"TEST": "test value"
+	},
 	"PROXY": {
 		"CHAT": "http://localhost:8082",
 		"CONVERSATION": "http://localhost:8083"

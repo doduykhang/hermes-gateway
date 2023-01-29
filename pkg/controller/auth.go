@@ -5,7 +5,6 @@ import (
 	"doduykhang/hermes-gateway/internal/proto"
 	"doduykhang/hermes-gateway/pkg/service"
 	"encoding/json"
-	"log"
 	"net/http"
 )
 
