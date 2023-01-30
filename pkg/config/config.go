@@ -40,8 +40,8 @@ func LoadConfig() *Config {
 	viper.AddConfigPath(".")
 	viper.SetConfigName("config")
 	viper.SetConfigType("json")
-	viper.ReadInConfig()
 	viper.AutomaticEnv()
+	viper.ReadInConfig()
 
 	err := viper.Unmarshal(&config)
 	if err != nil {

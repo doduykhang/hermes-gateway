@@ -15,6 +15,6 @@ FROM alpine:latest
 RUN mkdir /app
 
 COPY --from=builder /app/app /app
-
+COPY --from=builder /app/config.json /config.json
 
 CMD [ "/app/app" ]
