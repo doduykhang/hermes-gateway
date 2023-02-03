@@ -18,6 +18,7 @@ func NewConversation(proxy *httputil.ReverseProxy) *Conversation {
 func (c *Conversation) HandleConversationProxy(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	userID := ctx.Value("userID").(string)
+	r.Header.Del("x-user-id")
 	r.Header.Add("x-user-id", userID)
 	c.proxy.ServeHTTP(w, r)	
 }

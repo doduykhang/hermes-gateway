@@ -13,12 +13,22 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	chiMid "github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 )
 
 
 func NewRestApi() {
 	r := chi.NewRouter()
 	r.Use(chiMid.Logger)
+		
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   []string{"https://localhost:3000", "http://localhost:3000"},
+    		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+    		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+    		AllowCredentials: true,
+    		MaxAge:           300, // Maximum value not ignored by any of major browsers
+  	}))
+
 	
 	//config
 	conf := config.LoadConfig()

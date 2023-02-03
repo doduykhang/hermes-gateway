@@ -6,6 +6,9 @@ import (
 	"doduykhang/hermes-gateway/pkg/service"
 	"encoding/json"
 	"net/http"
+
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type Auth struct {
@@ -32,9 +35,12 @@ func (c *Auth) Register(w http.ResponseWriter, r *http.Request) {
 
 	res, err := c.service.Register(context.Background(), &req)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)	
-		w.Write([]byte(err.Error()))
-		return
+		st, _:= status.FromError(err)
+		if st.Code() == codes.Unavailable {
+			w.WriteHeader(http.StatusConflict)	
+			w.Write([]byte("Email already used"))
+			return
+		}	
 	}
 
 	token, err := c.tokenService.CreateToken(res.UserID)
@@ -47,9 +53,7 @@ func (c *Auth) Register(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{
 		Name: "session-id",
 		Value: token,
-		Path: "/api",
-		Domain: "localhost",
-		Secure: true,
+		Path: "/",
 		HttpOnly: true,
 	})
 
@@ -65,11 +69,15 @@ func (c *Auth) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+
 	res, err := c.service.Login(context.Background(), &req)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)	
-		w.Write([]byte(err.Error()))
-		return 
+		st, _:= status.FromError(err)
+		if st.Code() == codes.Unauthenticated {
+			w.WriteHeader(http.StatusUnauthorized)	
+			w.Write([]byte("Wrong user name or password"))
+			return
+		}	
 	}
 
 	token, err := c.tokenService.CreateToken(res.UserID)
@@ -83,7 +91,6 @@ func (c *Auth) Login(w http.ResponseWriter, r *http.Request) {
 		Name: "session-id",
 		Value: token,
 		Path: "/api",
-		Domain: "localhost",
 		HttpOnly: true,
 	})
 
